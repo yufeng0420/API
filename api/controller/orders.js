@@ -45,8 +45,7 @@ exports.orders_create_order = (req, res, next) => {
         _id: mongoose.Types.ObjectId(),
         quantity: req.body.quantity,
         product: req.body.productId,
-        user: req.body.userId,
-        date: Date.now
+        user: req.body.userId
       });
       return order.save();
     })

@@ -17,7 +17,7 @@ const orderSchema = mongoose.Schema({
     type: String,
     default: "Pending"
   },
-  date: { type: Date }
+  date: { type: Date, default: Date.now }
 });
 
 module.exports = mongoose.model("Order", orderSchema);
