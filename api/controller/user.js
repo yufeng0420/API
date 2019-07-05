@@ -5,6 +5,24 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const Order = require("../models/order");
 
+exports.get_all_users = (req, res, next) => {
+  User.find()
+    .select("email _id date ")
+    .exec()
+    .then(docs => {
+      res.status(200).json({
+        count: docs.length,
+        product: docs.map(doc => {
+          return {
+            email: doc.email,
+            date: doc.date,
+            _id: doc._id
+          };
+        })
+      });
+    });
+};
+
 exports.user_signup = (req, res, next) => {
   User.find({ email: req.body.email })
     .exec()
@@ -23,7 +41,8 @@ exports.user_signup = (req, res, next) => {
             const user = new User({
               _id: new mongoose.Types.ObjectId(),
               email: req.body.email,
-              password: hash
+              password: hash,
+              date: Date.now
             });
             user
               .save()

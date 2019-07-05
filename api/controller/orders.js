@@ -45,7 +45,8 @@ exports.orders_create_order = (req, res, next) => {
         _id: mongoose.Types.ObjectId(),
         quantity: req.body.quantity,
         product: req.body.productId,
-        user: req.body.userId
+        user: req.body.userId,
+        date: Date.now
       });
       return order.save();
     })
@@ -134,6 +135,7 @@ exports.orders_get_orderByUserId = (req, res, nest) => {
             quantity: doc.quantity,
             user: doc.user,
             status: doc.status,
+            date: doc.date,
             request: {
               type: "GET",
               url: "http://localhost:3000/orders/" + doc._id
