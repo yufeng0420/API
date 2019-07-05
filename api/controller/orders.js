@@ -2,10 +2,11 @@ const mongoose = require("mongoose");
 
 const Order = require("../models/order");
 const Product = require("../models/product");
+const User = require("../models/user");
 
 exports.orders_get_all = (req, res, next) => {
   Order.find()
-    .select("product quantity _id")
+    .select("product quantity _id user date status")
     .populate("product", "name")
     .exec()
     .then(docs => {
@@ -16,6 +17,9 @@ exports.orders_get_all = (req, res, next) => {
             _id: doc._id,
             product: doc.product,
             quantity: doc.quantity,
+            user: doc.user,
+            date: doc.date,
+            status: doc.status,
             request: {
               type: "GET",
               url: "http://localhost:3000/orders/" + doc._id
@@ -40,7 +44,8 @@ exports.orders_create_order = (req, res, next) => {
       const order = new Order({
         _id: mongoose.Types.ObjectId(),
         quantity: req.body.quantity,
-        product: req.body.productId
+        product: req.body.productId,
+        user: req.body.userId
       });
       return order.save();
     })
@@ -51,7 +56,10 @@ exports.orders_create_order = (req, res, next) => {
         createdOrder: {
           _id: result._id,
           product: result.product,
-          quantity: result.quantity
+          quantity: result.quantity,
+          user: result.user,
+          date: result.date,
+          status: result.status
         },
         request: {
           type: "GET",
@@ -86,6 +94,52 @@ exports.orders_get_order = (req, res, next) => {
     .catch(err => {
       res.status(500).json({
         error: err
+      });
+    });
+};
+
+exports.orders_update_status = (req, res, next) => {
+  Order.findByIdAndUpdate(
+    req.params.orderId,
+    { status: req.body.status },
+    { new: true }
+  )
+    .exec()
+    .then(result => {
+      res.status(200).json({
+        result,
+        message: "Order status updated"
+      });
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: err
+      });
+    });
+};
+
+exports.orders_get_orderByUserId = (req, res, nest) => {
+  Order.find({ user: req.params.userId })
+    .select("product quantity _id user date status")
+    .populate("product", "name")
+    .exec()
+    .then(docs => {
+      res.status(200).json({
+        count: docs.length,
+        orders: docs.map(doc => {
+          return {
+            _id: doc._id,
+            product: doc.product,
+            quantity: doc.quantity,
+            user: doc.user,
+            status: doc.status,
+            request: {
+              type: "GET",
+              url: "http://localhost:3000/orders/" + doc._id
+            }
+          };
+        })
       });
     });
 };

@@ -1,7 +1,9 @@
-const User = require("../models/user");
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+
+const User = require("../models/user");
+const Order = require("../models/order");
 
 exports.user_signup = (req, res, next) => {
   User.find({ email: req.body.email })
@@ -47,6 +49,7 @@ exports.user_login = (req, res, next) => {
   User.find({
     email: req.body.email
   })
+    .populate("Order")
     .exec()
     .then(user => {
       if (user.length < 1) {
@@ -73,7 +76,8 @@ exports.user_login = (req, res, next) => {
           );
           return res.status(200).json({
             message: "Auth successful",
-            token: token
+            token: token,
+            userId: user[0]._id
           });
         }
         res.status(401).json({
